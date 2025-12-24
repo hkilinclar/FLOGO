@@ -1,0 +1,8 @@
+{
+  "name": "FLOGO Feedback V1",
+  "description": "FLO ve In Street ekipleri için profesyonel mağaza ziyaret, denetim ve raporlama uygulaması. Satan/satmayan ürün analizi, görsel düzen kontrolü ve yapay zeka destekli raporlama sunar.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
