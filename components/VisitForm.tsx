@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { StoreVisit, StoreBrand, STORES, VISITORS, DEPARTMENTS, PRODUCT_GROUPS, PRODUCT_BRANDS } from '../types';
-import { Camera, ChevronRight, ChevronLeft, Save, Trash2, Check, User, MessageSquare, Info, TrendingUp, AlertCircle, Palette, Award, Tag, Maximize, PenTool, Store, Tag as TagIcon } from 'lucide-react';
+/* Added UserCheck and Plus imports to resolve errors on lines 565 and 611 */
+import { Camera, ChevronRight, ChevronLeft, Save, Trash2, Check, User, MessageSquare, Info, TrendingUp, AlertCircle, Palette, Award, Tag, Maximize, PenTool, Store, Tag as TagIcon, LayoutGrid, UserCheck, Plus } from 'lucide-react';
 
 interface VisitFormProps {
   onSave: (visit: StoreVisit) => void;
@@ -63,7 +64,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    }, 100);
+    }, 150);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,7 +122,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
     const finalProductBrand = formData.productBrand === 'DİĞER' ? otherProductBrand : (formData.productBrand || '');
     
     const finalVisit: StoreVisit = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: `V-${Date.now().toString(36).toUpperCase()}`,
       visitorName: formData.visitorName || '',
       visitorDepartment: formData.visitorDepartment || '',
       brand: formData.brand as StoreBrand,
@@ -190,8 +191,8 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
   const isStep2Valid = (formData.photos || []).length > 0;
 
   const RadioGroup = ({ id, label, value, options, onChange }: { id: string, label: string, value: string, options: string[], onChange: (val: string) => void }) => (
-    <div id={id} className="space-y-2 scroll-mt-24">
-      <label className="block text-sm font-semibold text-slate-700 leading-tight">
+    <div id={id} className="space-y-3 scroll-mt-24 bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100">
+      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
         {label} <span className="text-rose-500">*</span>
       </label>
       <div className="flex gap-2">
@@ -200,7 +201,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
             key={opt}
             type="button"
             onClick={() => onChange(opt)}
-            className={`flex-1 py-2 px-3 rounded-xl border-2 font-medium text-xs transition-all ${value === opt ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm' : 'border-slate-100 bg-white text-slate-400 hover:border-orange-100'}`}
+            className={`flex-1 py-3 px-3 rounded-2xl border-2 font-bold text-xs transition-all active:scale-95 ${value === opt ? 'border-orange-500 bg-white text-orange-700 shadow-sm' : 'border-transparent bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
           >
             {opt}
           </button>
@@ -210,12 +211,12 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
   );
 
   const RatingSelect = ({ id, label, value, onChange, subtitle }: { id: string, label: string, value: number | undefined, onChange: (val: number) => void, subtitle?: string }) => (
-    <div id={id} className="space-y-3 scroll-mt-24">
+    <div id={id} className="space-y-4 scroll-mt-24 p-5 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
       <div>
-        <label className="block text-sm font-semibold text-slate-700 leading-tight">
+        <label className="block text-sm font-bold text-slate-800 leading-tight">
           {label} <span className="text-rose-500">*</span>
         </label>
-        {subtitle && <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-[10px] text-slate-400 mt-1 font-medium uppercase tracking-wider">{subtitle}</p>}
       </div>
       <div className="grid grid-cols-5 gap-2">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
@@ -223,7 +224,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
             key={v}
             type="button"
             onClick={() => onChange(v)}
-            className={`h-9 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${value === v ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-100' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-orange-200 text-xs'}`}
+            className={`h-11 rounded-xl flex items-center justify-center font-black border-2 transition-all active:scale-90 ${value === v ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-100' : 'border-slate-50 bg-slate-50 text-slate-400 hover:border-slate-200 text-xs'}`}
           >
             {v}
           </button>
@@ -232,31 +233,42 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
     </div>
   );
 
-  const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-    <div className="flex items-center gap-2 mb-4 mt-2">
-      <div className="p-1.5 bg-orange-100 rounded-lg text-orange-600">
-        <Icon size={16} />
-      </div>
-      <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight">{title}</h3>
+  const SectionHeader = ({ icon: Icon, title, desc }: { icon: any, title: string, desc?: string }) => (
+    <div className="flex flex-col gap-1 mb-6">
+        <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-slate-900 rounded-2xl text-white shadow-lg">
+                <Icon size={18} />
+            </div>
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">{title}</h3>
+        </div>
+        {desc && <p className="text-[10px] text-slate-400 font-medium ml-12 uppercase tracking-widest">{desc}</p>}
     </div>
   );
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 text-slate-800">
-      <div className="flex justify-between mb-8 px-4">
+    <div className="pb-32 animate-fade-in">
+      {/* Progress Bar */}
+      <div className="flex justify-between items-center mb-10 px-4">
         {[1, 2].map(s => (
-          <div key={s} className={`h-1.5 flex-1 mx-1 rounded-full ${s <= step ? 'bg-orange-500' : 'bg-slate-200'}`} />
+          <React.Fragment key={s}>
+            <div className={`relative flex items-center justify-center w-10 h-10 rounded-full font-black text-sm transition-all duration-500 ${step >= s ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'bg-slate-200 text-slate-400'}`}>
+                {s}
+                {step > s && <Check size={16} strokeWidth={4} className="absolute inset-0 m-auto" />}
+            </div>
+            {s === 1 && <div className={`flex-1 h-1 mx-2 rounded-full transition-all duration-700 ${step > s ? 'bg-orange-500' : 'bg-slate-200'}`} />}
+          </React.Fragment>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-8">
+      <div className="bg-white rounded-[3rem] p-6 shadow-sm border border-slate-100 space-y-12">
         {step === 1 && (
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <SectionHeader icon={Info} title="FLOGO FEEDBACK" />
-              <div className="space-y-4">
+          <div className="space-y-12">
+            {/* Store Identification */}
+            <div className="space-y-6">
+              <SectionHeader icon={Info} title="TEMEL BİLGİLER" desc="Ziyaret kapsamını belirleyiniz" />
+              <div className="space-y-6">
                 <div id="q-brand" className="scroll-mt-24">
-                  <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">KANAL SEÇİNİZ <span className="text-rose-500">*</span></label>
+                  <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">ZİYARET EDİLEN KANAL <span className="text-rose-500">*</span></label>
                   <div className="grid grid-cols-2 gap-3">
                     {[StoreBrand.FLO, StoreBrand.IN_STREET, StoreBrand.REEBOK, StoreBrand.LUMBERJACK].map((brand) => (
                       <button
@@ -266,7 +278,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
                           setFormData({ ...formData, brand });
                           scrollToNext('q-productBrand');
                         }}
-                        className={`py-2 px-4 rounded-xl border-2 transition-all font-semibold text-sm ${formData.brand === brand ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-100 text-slate-500'}`}
+                        className={`py-4 px-4 rounded-2xl border-2 transition-all font-black text-xs active:scale-95 ${formData.brand === brand ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-50 bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
                       >
                         {brand}
                       </button>
@@ -274,20 +286,18 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
                   </div>
                 </div>
 
-                <div id="q-productBrand" className="scroll-mt-24">
-                  <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">MARKA SEÇİNİZ <span className="text-rose-500">*</span></label>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
+                <div id="q-productBrand" className="scroll-mt-24 p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
+                  <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">ZİYARET EDİLEN MARKA <span className="text-rose-500">*</span></label>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     {PRODUCT_BRANDS.map(brand => (
                       <button
                         key={brand}
                         type="button"
                         onClick={() => {
                           setFormData({ ...formData, productBrand: brand });
-                          if (brand !== 'DİĞER') {
-                            scrollToNext('q-store');
-                          }
+                          if (brand !== 'DİĞER') scrollToNext('q-store');
                         }}
-                        className={`py-2 px-4 rounded-xl border-2 transition-all font-semibold text-sm ${formData.productBrand === brand ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-100 text-slate-500'}`}
+                        className={`py-3 px-3 rounded-xl border-2 transition-all font-bold text-[11px] active:scale-95 ${formData.productBrand === brand ? 'border-slate-900 bg-slate-900 text-white' : 'border-transparent bg-white text-slate-500'}`}
                       >
                         {brand}
                       </button>
@@ -295,60 +305,57 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
                   </div>
 
                   {formData.productBrand === 'DİĞER' && (
-                    <div className="animate-in fade-in slide-in-from-top-2">
-                      <div className="relative">
-                        <TagIcon size={16} className="absolute left-3 top-3.5 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Marka Adını Yazınız *"
-                          className={`w-full p-3 pl-10 rounded-xl bg-white border-2 focus:border-orange-500 outline-none text-sm shadow-sm transition-all ${!otherProductBrand.trim() ? 'border-orange-200' : 'border-slate-100'}`}
-                          value={otherProductBrand}
-                          onChange={e => setOtherProductBrand(e.target.value)}
-                        />
-                        {!otherProductBrand.trim() && <p className="text-[10px] text-orange-600 font-bold italic mt-1">* Bu alan zorunludur.</p>}
-                      </div>
+                    <div className="animate-in fade-in slide-in-from-top-2 relative">
+                      <TagIcon size={16} className="absolute left-4 top-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Marka Adını Yazınız..."
+                        className="w-full p-4 pl-12 rounded-2xl bg-white border border-slate-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm font-bold"
+                        value={otherProductBrand}
+                        onChange={e => setOtherProductBrand(e.target.value)}
+                      />
                     </div>
                   )}
                 </div>
 
                 <div id="q-store" className="scroll-mt-24">
-                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">MAĞAZA SEÇİNİZ <span className="text-rose-500">*</span></label>
-                  <select
-                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 outline-none appearance-none mb-3"
-                    value={storeSelect}
-                    onChange={e => {
-                      setStoreSelect(e.target.value);
-                      scrollToNext('q-visitor-info');
-                    }}
-                  >
-                    <option value="">Mağaza Seçiniz...</option>
-                    {STORES.map(store => (
-                      <option key={store} value={store}>{store}</option>
-                    ))}
-                  </select>
+                  <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">MAĞAZA SEÇİMİ <span className="text-rose-500">*</span></label>
+                  <div className="relative">
+                    <Store size={18} className="absolute left-4 top-4 text-slate-400 pointer-events-none" />
+                    <select
+                        className="w-full p-4 pl-12 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none appearance-none"
+                        value={storeSelect}
+                        onChange={e => {
+                        setStoreSelect(e.target.value);
+                        scrollToNext('q-visitor-info');
+                        }}
+                    >
+                        <option value="">Mağaza Seçiniz...</option>
+                        {STORES.map(store => (
+                        <option key={store} value={store}>{store}</option>
+                        ))}
+                    </select>
+                    <div className="absolute right-4 top-4 pointer-events-none text-slate-400"><ChevronRight size={18} className="rotate-90" /></div>
+                  </div>
 
                   {storeSelect === 'DİĞER' && (
-                    <div className="animate-in fade-in slide-in-from-top-2">
-                      <div className="relative">
-                        <Store size={16} className="absolute left-3 top-3.5 text-slate-400" />
+                    <div className="mt-4 animate-in fade-in slide-in-from-top-2">
                         <input
                           type="text"
-                          placeholder="Mağaza Adını Yazınız *"
-                          className={`w-full p-3 pl-10 rounded-xl bg-white border-2 focus:border-orange-500 outline-none text-sm shadow-sm transition-all ${!otherStore.trim() ? 'border-orange-200' : 'border-slate-100'}`}
+                          placeholder="Mağaza Adını Yazınız..."
+                          className="w-full p-4 rounded-2xl bg-white border border-orange-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm font-bold"
                           value={otherStore}
                           onChange={e => setOtherStore(e.target.value)}
                         />
-                        {!otherStore.trim() && <p className="text-[10px] text-orange-600 font-bold italic mt-1">* Bu alan zorunludur.</p>}
-                      </div>
                     </div>
                   )}
                 </div>
 
-                <div id="q-visitor-info" className="grid grid-cols-2 gap-3 scroll-mt-24">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Ziyaretçi <span className="text-rose-500">*</span></label>
+                <div id="q-visitor-info" className="grid grid-cols-2 gap-4 scroll-mt-24 p-5 bg-orange-50/50 rounded-[2rem] border border-orange-100">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-orange-900/40 uppercase tracking-widest">ZİYARETÇİ</label>
                     <select
-                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none appearance-none"
+                      className="w-full p-3 rounded-xl bg-white border border-orange-100 text-[11px] font-bold focus:ring-2 focus:ring-orange-500 outline-none"
                       value={formData.visitorName || ''}
                       onChange={e => setFormData({ ...formData, visitorName: e.target.value })}
                     >
@@ -358,10 +365,10 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Departman <span className="text-rose-500">*</span></label>
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-orange-900/40 uppercase tracking-widest">DEPARTMAN</label>
                     <select
-                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none appearance-none"
+                      className="w-full p-3 rounded-xl bg-white border border-orange-100 text-[11px] font-bold focus:ring-2 focus:ring-orange-500 outline-none"
                       value={formData.visitorDepartment || ''}
                       onChange={e => setFormData({ ...formData, visitorDepartment: e.target.value })}
                     >
@@ -375,328 +382,258 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
               </div>
             </div>
 
-            <div className="space-y-5 pt-6 border-t">
-              <SectionHeader icon={Camera} title="Görsel Denetim" />
-              <RatingSelect 
-                id="q-visualScore"
-                label="Mağazanın genel görsel düzenlemesini puanlayınız?"
-                value={formData.generalVisualScore}
-                onChange={(v) => {
-                  setFormData({ ...formData, generalVisualScore: v });
-                  scrollToNext('q-visualComments');
-                }}
-              />
-              <div id="q-visualComments" className="space-y-3 scroll-mt-24">
-                <label className="block text-sm font-semibold text-slate-700 leading-tight">Görsel düzenleme ile ilgili yorumlarınızı yazınız? <span className="text-rose-500">*</span></label>
-                <textarea
-                  className={`w-full p-3 rounded-xl bg-slate-50 border min-h-[100px] focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all ${!formData.generalVisualComments?.trim() ? 'border-orange-200 shadow-sm shadow-orange-50' : 'border-slate-200'}`}
-                  placeholder="Detaylı yorumlarınızı buraya yazınız..."
-                  value={formData.generalVisualComments || ''}
-                  onChange={e => setFormData({ ...formData, generalVisualComments: e.target.value })}
-                />
-                {!formData.generalVisualComments?.trim() && <p className="text-[10px] text-orange-600 font-bold italic">* Bu alan zorunludur.</p>}
-              </div>
-              <RadioGroup 
-                id="q-lineTheme"
-                label="Ürünler line/tema bütünlüğüne uygun sergileniyor mu?"
-                value={formData.lineThemeAlignment || ''}
-                options={['Evet', 'Kısmen', 'Hayır']}
-                onChange={(val) => {
-                  setFormData({ ...formData, lineThemeAlignment: val });
-                  scrollToNext('q-seasonal');
-                }}
-              />
-              <RadioGroup 
-                id="q-seasonal"
-                label="Yeni sezon / kampanya görselleri kullanılmış mı?"
-                value={formData.seasonalVisualsUsed || ''}
-                options={['Evet', 'Kısmen', 'Hayır']}
-                onChange={(val) => {
-                  setFormData({ ...formData, seasonalVisualsUsed: val });
-                  scrollToNext('q-heroPromo');
-                }}
-              />
-              <RadioGroup 
-                id="q-heroPromo"
-                label="Vurgulanması gereken hero-promo ve özellikli ürünler ön planda mıydı?"
-                value={formData.heroPromoVisibility || ''}
-                options={['Evet', 'Hayır']}
-                onChange={(val) => {
-                  setFormData({ ...formData, heroPromoVisibility: val });
-                  scrollToNext('q-apparelStock');
-                }}
-              />
-              <RadioGroup 
-                id="q-apparelStock"
-                label="Giyim ürünlerinde mağaza doluluğu yeterli düzeyde mi?"
-                value={formData.apparelStockLevel || ''}
-                options={['Evet', 'Hayır']}
-                onChange={(val) => {
-                  setFormData({ ...formData, apparelStockLevel: val });
-                  scrollToNext('q-warehouse');
-                }}
-              />
-              <RadioGroup 
-                id="q-warehouse"
-                label="Depoda olup reyona çıkmayan ürün var mı?"
-                value={formData.productsInWarehouseNotOnShelf || ''}
-                options={['Evet', 'Hayır']}
-                onChange={(val) => {
-                  setFormData({ ...formData, productsInWarehouseNotOnShelf: val });
-                  scrollToNext('q-stockSlider');
-                }}
-              />
-              
-              <div id="q-stockSlider" className="pt-2 pb-2 scroll-mt-24">
-                <label className="block text-sm font-bold text-slate-700 mb-4 uppercase">Mağazada hissettiğiniz doluluk oranı? <span className="text-rose-500">*</span></label>
-                <div className="px-2">
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    step="5" 
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-orange-500" 
-                    value={formData.stockLevel || 0} 
-                    onChange={e => setFormData({ ...formData, stockLevel: parseInt(e.target.value) })} 
-                  />
-                  <div className="text-center mt-3"><span className="text-2xl font-black text-orange-600 tracking-tight">%{formData.stockLevel}</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-6 border-t">
-              <SectionHeader icon={TrendingUp} title="Performans & Ürün Grupları" />
-              <RatingSelect 
-                id="q-classBalance"
-                label="Mağazadaki klasman (alt/üst/dış giyim) dengesini puanlayınız?"
-                value={formData.classificationBalanceScore}
-                onChange={(v) => {
-                  setFormData({ ...formData, classificationBalanceScore: v });
-                  scrollToNext('q-collPerf');
-                }}
-              />
-              <RatingSelect 
-                id="q-collPerf"
-                label="Mağazadaki ürünlerin müşteri ihtiyaçlarını karşılama performansını puanlayınız?"
-                value={formData.collectionPerformanceScore}
-                onChange={(v) => {
-                  setFormData({ ...formData, collectionPerformanceScore: v });
-                  scrollToNext('q-missed');
-                }}
-              />
-
-              <div id="q-missed" className="space-y-3 scroll-mt-24">
-                <label className="block text-sm font-semibold text-slate-700">Karşılayamadığımız ürün grupları? <span className="text-rose-500">*</span></label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PRODUCT_GROUPS.map(group => (
-                    <button
-                      key={group}
-                      type="button"
-                      onClick={() => toggleMissedGroup(group)}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left text-[11px] font-medium transition-all ${formData.missedProductGroups?.includes(group) ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-50 bg-slate-50 text-slate-500 hover:border-orange-100'}`}
-                    >
-                      <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${formData.missedProductGroups?.includes(group) ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 bg-white'}`}>
-                        {formData.missedProductGroups?.includes(group) && <Check size={10} strokeWidth={4} />}
-                      </div>
-                      {group}
-                    </button>
-                  ))}
-                </div>
-                {(formData.missedProductGroups || []).length === 0 && <p className="text-[10px] text-orange-600 font-bold italic">* En az bir grup seçmelisiniz.</p>}
-              </div>
-
-              <div id="q-topSelling" className="space-y-3 scroll-mt-24">
-                <label className="block text-sm font-semibold text-slate-700">En çok satın alınan ürün grupları? <span className="text-rose-500">*</span></label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PRODUCT_GROUPS.filter(g => g !== "Diğer").map(group => (
-                    <button
-                      key={`top-${group}`}
-                      type="button"
-                      onClick={() => toggleTopSellingGroup(group)}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left text-[11px] font-medium transition-all ${formData.topSellingProductGroups?.includes(group) ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-50 bg-slate-50 text-slate-500 hover:border-green-100'}`}
-                    >
-                      <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${formData.topSellingProductGroups?.includes(group) ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 bg-white'}`}>
-                        {formData.topSellingProductGroups?.includes(group) && <Check size={10} strokeWidth={4} />}
-                      </div>
-                      {group}
-                    </button>
-                  ))}
-                </div>
-                {(formData.topSellingProductGroups || []).length === 0 && <p className="text-[10px] text-orange-600 font-bold italic">* En az bir grup seçmelisiniz.</p>}
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-6 border-t">
-              <SectionHeader icon={Palette} title="Müşteri Algı Analizi" />
-              <div className="space-y-4">
-                <RatingSelect 
-                  id="q-design"
-                  label="Müşterilerimizin ürünleri tasarım bakımından beğenisini puanlayınız?" 
-                  value={formData.designScore} 
-                  onChange={(v) => {
-                    setFormData({ ...formData, designScore: v });
-                    scrollToNext('q-quality');
-                  }} 
-                />
-                <RatingSelect 
-                  id="q-quality"
-                  label="Müşterilerimizin ürünleri kalite bakımından beğenisini puanlayınız?" 
-                  value={formData.qualityScore} 
-                  onChange={(v) => {
-                    setFormData({ ...formData, qualityScore: v });
-                    scrollToNext('q-price');
-                  }} 
-                />
-                <RatingSelect 
-                  id="q-price"
-                  label="Müşterilerimizin ürünlerin fiyat uygunluğu bakımından değerlendirmesini puanlayınız?" 
-                  subtitle="(10: Çok Uygun - 1: Çok Pahalı)" 
-                  value={formData.priceScore} 
-                  onChange={(v) => {
-                    setFormData({ ...formData, priceScore: v });
-                    scrollToNext('q-fit');
-                  }} 
-                />
-                <RatingSelect 
-                  id="q-fit"
-                  label="Müşterilerimizin ürünleri kalıp/fit bakımından beğenisini puanlayınız?" 
-                  value={formData.fitScore} 
-                  onChange={(v) => {
-                    setFormData({ ...formData, fitScore: v });
-                    scrollToNext('q-graphics');
-                  }} 
-                />
-                <RatingSelect 
-                  id="q-graphics"
-                  label="Müşterilerimizin ürünleri grafik/baskı/nakış bakımından beğenisini puanlayınız?" 
-                  value={formData.graphicsScore} 
-                  onChange={(v) => {
-                    setFormData({ ...formData, graphicsScore: v });
-                    scrollToNext('q-hasProblems');
-                  }} 
-                />
-              </div>
-
-              <div className="pt-4 space-y-4">
-                <RadioGroup 
-                  id="q-hasProblems"
-                  label="Tasarım-Kalite-Fiyat-Kalıp-Grafik bakımından sorun yaşadığınız ürünler var mı?"
-                  value={formData.hasProductProblems || ''}
-                  options={['Evet', 'Hayır']}
-                  onChange={(val) => {
-                    setFormData({ ...formData, hasProductProblems: val });
-                    if (val === 'Hayır') {
-                      scrollToNext('q-staffFeedback-section');
-                    }
-                  }}
+            {/* Visual Inspection Section */}
+            <div className="space-y-8 pt-8 border-t border-slate-100">
+              <SectionHeader icon={Camera} title="GÖRSEL DENETİM" desc="Mağaza atmosferi ve standartlar" />
+              <div className="space-y-6">
+                  <RatingSelect 
+                    id="q-visualScore"
+                    label="Mağazanın genel görsel düzenlemesini nasıl buldunuz?"
+                    value={formData.generalVisualScore}
+                    onChange={(v) => {
+                    setFormData({ ...formData, generalVisualScore: v });
+                    scrollToNext('q-visualComments');
+                    }}
                 />
                 
-                {formData.hasProductProblems === 'Evet' && (
-                  <div className="animate-in fade-in slide-in-from-top-2 space-y-4">
+                <div id="q-visualComments" className="space-y-3 scroll-mt-24 p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
+                    <label className="block text-sm font-bold text-slate-800">Görsel Düzenleme Yorumları <span className="text-rose-500">*</span></label>
                     <textarea
-                      className={`w-full p-3 rounded-xl bg-white border-2 focus:border-orange-500 outline-none text-sm min-h-[100px] shadow-sm ${!formData.productProblemDetails?.trim() ? 'border-orange-200' : 'border-slate-100'}`}
-                      placeholder="Sorunlu model detaylarını yazınız... *"
-                      value={formData.productProblemDetails || ''}
-                      onChange={e => setFormData({ ...formData, productProblemDetails: e.target.value })}
+                    className="w-full p-4 rounded-2xl bg-white border border-slate-200 min-h-[120px] focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium"
+                    placeholder="Eksikler, başarılar veya spesifik notlar..."
+                    value={formData.generalVisualComments || ''}
+                    onChange={e => setFormData({ ...formData, generalVisualComments: e.target.value })}
                     />
-                    {!formData.productProblemDetails?.trim() && <p className="text-[10px] text-orange-600 font-bold italic mt-1">* Sorun varsa detay belirtilmelidir.</p>}
-                    
-                    <div className="space-y-3">
-                      <label className="block text-sm font-semibold text-slate-700">Sorunlu ürün fotoğrafını ekleyiniz</label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {formData.problemPhotos?.map((p, i) => (
-                          <div key={i} className="relative aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100">
-                            <img src={p} className="w-full h-full object-cover" />
-                            <button type="button" onClick={() => setFormData({...formData, problemPhotos: formData.problemPhotos?.filter((_, idx) => idx !== i)})} className="absolute top-1 right-1 p-1 bg-white/90 rounded-full shadow-sm"><Trash2 size={12} className="text-rose-600" /></button>
-                          </div>
-                        ))}
-                        <label className="aspect-square border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-all hover:border-orange-200 group">
-                          <Camera size={24} className="group-hover:text-orange-500" />
-                          <span className="text-[10px] font-bold mt-1 uppercase">Foto Ekle</span>
-                          <input type="file" multiple accept="image/*" onChange={handleProblemPhotoUpload} className="hidden" />
-                        </label>
-                      </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                    <RadioGroup id="q-lineTheme" label="Line/Tema Bütünlüğü Uygun mu?" value={formData.lineThemeAlignment || ''} options={['Evet', 'Kısmen', 'Hayır']} onChange={(val) => { setFormData({ ...formData, lineThemeAlignment: val }); scrollToNext('q-seasonal'); }} />
+                    <RadioGroup id="q-seasonal" label="Yeni Sezon Görselleri Var mı?" value={formData.seasonalVisualsUsed || ''} options={['Evet', 'Kısmen', 'Hayır']} onChange={(val) => { setFormData({ ...formData, seasonalVisualsUsed: val }); scrollToNext('q-heroPromo'); }} />
+                    <RadioGroup id="q-heroPromo" label="Hero/Promo Ürünler Ön Planda mı?" value={formData.heroPromoVisibility || ''} options={['Evet', 'Hayır']} onChange={(val) => { setFormData({ ...formData, heroPromoVisibility: val }); scrollToNext('q-apparelStock'); }} />
+                    <RadioGroup id="q-apparelStock" label="Giyim Doluluğu Yeterli mi?" value={formData.apparelStockLevel || ''} options={['Evet', 'Hayır']} onChange={(val) => { setFormData({ ...formData, apparelStockLevel: val }); scrollToNext('q-warehouse'); }} />
+                    <RadioGroup id="q-warehouse" label="Depoda Olup Reyonda Olmayan Ürün Var mı?" value={formData.productsInWarehouseNotOnShelf || ''} options={['Evet', 'Hayır']} onChange={(val) => { setFormData({ ...formData, productsInWarehouseNotOnShelf: val }); scrollToNext('q-stockSlider'); }} />
+                </div>
+                
+                <div id="q-stockSlider" className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl scroll-mt-24">
+                    <label className="block text-xs font-black uppercase tracking-[0.2em] mb-6 text-orange-400">HİSSEDİLEN MAĞAZA DOLULUĞU <span className="text-rose-500">*</span></label>
+                    <div className="px-2">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-4 uppercase tracking-widest">
+                            <span>Boş</span>
+                            <span>Dengeli</span>
+                            <span>Full</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="100" 
+                            step="5" 
+                            className="w-full h-3 bg-slate-800 rounded-full appearance-none cursor-pointer accent-orange-500" 
+                            value={formData.stockLevel || 0} 
+                            onChange={e => setFormData({ ...formData, stockLevel: parseInt(e.target.value) })} 
+                        />
+                        <div className="text-center mt-6">
+                            <span className="text-5xl font-black text-white tracking-tighter">%{formData.stockLevel}</span>
+                        </div>
                     </div>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
 
-            <div id="q-staffFeedback-section" className="space-y-5 pt-6 border-t scroll-mt-24">
-              <SectionHeader icon={MessageSquare} title="Saha Geri Bildirimi" />
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Genel yorumlar ve alınan geri bildirimler? <span className="text-rose-500">*</span></label>
-                <textarea
-                  className={`w-full p-3 rounded-xl bg-slate-50 border min-h-[100px] focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all ${!formData.storeGeneralFeedback?.trim() ? 'border-orange-200 shadow-sm' : 'border-slate-200'}`}
-                  placeholder="Mağaza ekibinin ilettiği görüşler..."
-                  value={formData.storeGeneralFeedback || ''}
-                  onChange={e => setFormData({ ...formData, storeGeneralFeedback: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Geri bildirim veren mağaza çalışanı? <span className="text-rose-500">*</span></label>
-                <div className="relative">
-                  <User size={16} className="absolute left-3 top-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Ad Soyad"
-                    className={`w-full p-3 pl-10 rounded-xl bg-slate-50 border focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all ${!formData.feedbackStaffName?.trim() ? 'border-orange-200' : 'border-slate-200'}`}
-                    value={formData.feedbackStaffName || ''}
-                    onChange={e => setFormData({ ...formData, feedbackStaffName: e.target.value })}
-                  />
+            {/* Product Performance Section */}
+            <div className="space-y-8 pt-8 border-t border-slate-100">
+              <SectionHeader icon={TrendingUp} title="SATIŞ & PERFORMANS" desc="Satan ve satmayan ürün analizi" />
+              <div className="space-y-6">
+                <RatingSelect id="q-classBalance" label="Alt/Üst/Dış Giyim Klasman Dengesi?" value={formData.classificationBalanceScore} onChange={(v) => { setFormData({ ...formData, classificationBalanceScore: v }); scrollToNext('q-collPerf'); }} />
+                <RatingSelect id="q-collPerf" label="İhtiyaç Karşılama Performansı?" value={formData.collectionPerformanceScore} onChange={(v) => { setFormData({ ...formData, collectionPerformanceScore: v }); scrollToNext('q-missed'); }} />
+
+                <div id="q-missed" className="space-y-4 scroll-mt-24 p-6 bg-rose-50 rounded-[2.5rem] border border-rose-100">
+                    <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={16} className="text-rose-500" />
+                        <label className="block text-sm font-black text-rose-900 uppercase tracking-tight">SATMAYAN / EKSİK GRUPLAR <span className="text-rose-500">*</span></label>
+                    </div>
+                    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-4">Müşterinin bulamadığı veya rağbet görmeyenler</p>
+                    <div className="grid grid-cols-2 gap-2">
+                    {PRODUCT_GROUPS.map(group => (
+                        <button
+                        key={group}
+                        type="button"
+                        onClick={() => toggleMissedGroup(group)}
+                        className={`flex items-center gap-3 p-3 rounded-2xl border-2 text-left text-[11px] font-bold transition-all active:scale-95 ${formData.missedProductGroups?.includes(group) ? 'border-rose-500 bg-white text-rose-700 shadow-sm' : 'border-transparent bg-rose-100/50 text-rose-400'}`}
+                        >
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${formData.missedProductGroups?.includes(group) ? 'bg-rose-500 border-rose-500 text-white' : 'border-rose-200 bg-white'}`}>
+                            {formData.missedProductGroups?.includes(group) && <Check size={12} strokeWidth={4} />}
+                        </div>
+                        {group}
+                        </button>
+                    ))}
+                    </div>
+                </div>
+
+                <div id="q-topSelling" className="space-y-4 scroll-mt-24 p-6 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
+                    <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp size={16} className="text-emerald-500" />
+                        <label className="block text-sm font-black text-emerald-900 uppercase tracking-tight">EN ÇOK SATAN GRUPLAR <span className="text-rose-500">*</span></label>
+                    </div>
+                    <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-4">Mağazanın yıldız kategorileri</p>
+                    <div className="grid grid-cols-2 gap-2">
+                    {PRODUCT_GROUPS.filter(g => g !== "Diğer").map(group => (
+                        <button
+                        key={`top-${group}`}
+                        type="button"
+                        onClick={() => toggleTopSellingGroup(group)}
+                        className={`flex items-center gap-3 p-3 rounded-2xl border-2 text-left text-[11px] font-bold transition-all active:scale-95 ${formData.topSellingProductGroups?.includes(group) ? 'border-emerald-500 bg-white text-emerald-700 shadow-sm' : 'border-transparent bg-emerald-100/50 text-emerald-400'}`}
+                        >
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${formData.topSellingProductGroups?.includes(group) ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-emerald-200 bg-white'}`}>
+                            {formData.topSellingProductGroups?.includes(group) && <Check size={12} strokeWidth={4} />}
+                        </div>
+                        {group}
+                        </button>
+                    ))}
+                    </div>
                 </div>
               </div>
-              <RatingSelect 
-                id="q-totalScore"
-                label="Mağazayı doluluk, görsel düzenleme, ideal sergileme gibi temel faktörleri göz önünde bulundurarak puanlayınız?"
-                value={formData.totalStoreScore}
-                onChange={(v) => {
-                  setFormData({ ...formData, totalStoreScore: v });
-                }}
-              />
+            </div>
+
+            {/* Customer Perception Section */}
+            <div className="space-y-8 pt-8 border-t border-slate-100">
+              <SectionHeader icon={Palette} title="MÜŞTERİ ALGISI" desc="Ürünlere yönelik geri bildirimler" />
+              <div className="space-y-6">
+                <RatingSelect id="q-design" label="Tasarım Beğenisi" value={formData.designScore} onChange={(v) => { setFormData({ ...formData, designScore: v }); scrollToNext('q-quality'); }} />
+                <RatingSelect id="q-quality" label="Kalite Algısı" value={formData.qualityScore} onChange={(v) => { setFormData({ ...formData, qualityScore: v }); scrollToNext('q-price'); }} />
+                <RatingSelect id="q-price" label="Fiyat Uygunluğu" subtitle="(10: Çok Uygun - 1: Pahalı)" value={formData.priceScore} onChange={(v) => { setFormData({ ...formData, priceScore: v }); scrollToNext('q-fit'); }} />
+                <RatingSelect id="q-fit" label="Kalıp / Fit Memnuniyeti" value={formData.fitScore} onChange={(v) => { setFormData({ ...formData, fitScore: v }); scrollToNext('q-graphics'); }} />
+                <RatingSelect id="q-graphics" label="Grafik / Baskı Beğenisi" value={formData.graphicsScore} onChange={(v) => { setFormData({ ...formData, graphicsScore: v }); scrollToNext('q-hasProblems'); }} />
+
+                <div className="pt-4">
+                  <RadioGroup 
+                    id="q-hasProblems"
+                    label="Sorun Yaşanan Spesifik Modeller Var mı?"
+                    value={formData.hasProductProblems || ''}
+                    options={['Evet', 'Hayır']}
+                    onChange={(val) => {
+                        setFormData({ ...formData, hasProductProblems: val });
+                        if (val === 'Hayır') scrollToNext('q-staffFeedback-section');
+                    }}
+                  />
+                  
+                  {formData.hasProductProblems === 'Evet' && (
+                    <div className="mt-4 animate-in fade-in slide-in-from-top-2 space-y-5 p-5 bg-rose-50 rounded-[2.5rem] border border-rose-100">
+                        <label className="block text-[10px] font-black text-rose-500 uppercase tracking-widest">SORUNLU MODEL DETAYLARI <span className="text-rose-500">*</span></label>
+                        <textarea
+                            className="w-full p-4 rounded-2xl bg-white border border-rose-200 focus:ring-2 focus:ring-rose-500 outline-none text-sm font-medium min-h-[100px]"
+                            placeholder="Ürün kodu, renk veya detaylı sorun tanımı..."
+                            value={formData.productProblemDetails || ''}
+                            onChange={e => setFormData({ ...formData, productProblemDetails: e.target.value })}
+                        />
+                        
+                        <div className="space-y-3">
+                        <label className="block text-[10px] font-black text-rose-500 uppercase tracking-widest">SORUNLU ÜRÜN FOTOĞRAFI</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            {formData.problemPhotos?.map((p, i) => (
+                            <div key={i} className="relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-white">
+                                <img src={p} className="w-full h-full object-cover" />
+                                <button type="button" onClick={() => setFormData({...formData, problemPhotos: formData.problemPhotos?.filter((_, idx) => idx !== i)})} className="absolute top-1 right-1 p-2 bg-white/90 rounded-full shadow-lg"><Trash2 size={12} className="text-rose-600" /></button>
+                            </div>
+                            ))}
+                            <label className="aspect-square border-2 border-dashed border-rose-200 rounded-2xl flex flex-col items-center justify-center text-rose-300 cursor-pointer hover:bg-white transition-all group">
+                            <Camera size={24} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-black mt-2 uppercase tracking-tighter">Ekle</span>
+                            <input type="file" multiple accept="image/*" onChange={handleProblemPhotoUpload} className="hidden" />
+                            </label>
+                        </div>
+                        </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Staff Feedback Section */}
+            <div id="q-staffFeedback-section" className="space-y-8 pt-8 border-t border-slate-100 scroll-mt-24">
+              <SectionHeader icon={MessageSquare} title="SAHA GERİ BİLDİRİMİ" desc="Personel ve genel görüşler" />
+              <div className="space-y-6">
+                <div className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                    <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-tight">Genel Saha Yorumları <span className="text-rose-500">*</span></label>
+                    <textarea
+                        className="w-full p-4 rounded-2xl bg-white border border-slate-200 min-h-[120px] focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium"
+                        placeholder="Personelin en çok ilettiği konular..."
+                        value={formData.storeGeneralFeedback || ''}
+                        onChange={e => setFormData({ ...formData, storeGeneralFeedback: e.target.value })}
+                    />
+                </div>
+                
+                <div className="flex items-center gap-4 bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <div className="p-3 bg-slate-100 rounded-2xl text-slate-400">
+                        {/* Fixed typo: UserCheck was used on line 565 but not available in some contexts, but it's imported now */}
+                        <UserCheck size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">GERİ BİLDİRİM VEREN PERSONEL</label>
+                        <input
+                            type="text"
+                            placeholder="Ad Soyad"
+                            className="w-full bg-transparent outline-none font-bold text-slate-900 border-b border-slate-100 pb-1"
+                            value={formData.feedbackStaffName || ''}
+                            onChange={e => setFormData({ ...formData, feedbackStaffName: e.target.value })}
+                        />
+                    </div>
+                </div>
+
+                <RatingSelect 
+                    id="q-totalScore"
+                    label="Mağazanın bu haftaki genel performans skoru nedir?"
+                    subtitle="Doluluk, görsel düzen ve müşteri algısı dahil"
+                    value={formData.totalStoreScore}
+                    onChange={(v) => {
+                    setFormData({ ...formData, totalStoreScore: v });
+                    }}
+                />
+              </div>
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="space-y-5">
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-              <div className="w-1.5 h-6 bg-slate-800 rounded-full" /> 
-              Görsel Kanıtlar <span className="text-rose-500">*</span>
-            </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">En az 1 adet fotoğraf yüklenmesi zorunludur.</p>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-8 animate-fade-in">
+            <div className="text-center space-y-2">
+                <div className="w-20 h-20 bg-orange-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-4 text-orange-500">
+                    <Camera size={40} />
+                </div>
+                <h2 className="text-2xl font-black text-slate-900">Görsel Kanıtlar</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">En az 1 adet fotoğraf zorunludur.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               {formData.photos?.map((p, i) => (
-                <div key={i} className="relative aspect-square rounded-2xl overflow-hidden shadow-md border border-slate-100">
+                <div key={i} className="relative aspect-square rounded-[2rem] overflow-hidden shadow-xl border-4 border-white">
                   <img src={p} className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setFormData({...formData, photos: formData.photos?.filter((_, idx) => idx !== i)})} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-md backdrop-blur-sm"><Trash2 size={14} className="text-rose-600" /></button>
+                  <button type="button" onClick={() => setFormData({...formData, photos: formData.photos?.filter((_, idx) => idx !== i)})} className="absolute top-2 right-2 p-2 bg-white/90 rounded-full shadow-lg"><Trash2 size={14} className="text-rose-600" /></button>
                 </div>
               ))}
-              <label className="aspect-square border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-all hover:border-orange-200 group">
-                <div className="p-3 bg-slate-50 rounded-full group-hover:bg-orange-50 transition-colors">
-                  <Camera size={28} className="group-hover:text-orange-500" />
-                </div>
-                <span className="text-[10px] font-bold mt-2 uppercase">Fotoğraf Ekle</span>
+              <label className="aspect-square border-4 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-slate-300 cursor-pointer hover:bg-slate-50 transition-all hover:border-orange-200 group">
+                <Plus size={32} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-black mt-3 uppercase tracking-widest">Ekle</span>
                 <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} className="hidden" />
               </label>
             </div>
-            {formData.photos && formData.photos.length === 0 && (
-              <p className="text-[10px] text-rose-500 font-black italic mt-4 text-center">
-                * Raporu bitirmek için lütfen en az bir fotoğraf yükleyiniz.
-              </p>
-            )}
           </div>
         )}
 
-        <div className="flex flex-col gap-3 pt-6">
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-4 pt-6">
           {step === 1 && !isStep1Valid && (
-            <p className="text-[10px] text-rose-500 font-bold text-center italic">
-              * Lütfen tüm soruları ve puanlamaları eksiksiz tamamlayınız.
-            </p>
+            <div className="flex items-center justify-center gap-2 p-4 bg-rose-50 rounded-2xl border border-rose-100 text-rose-600">
+                <AlertCircle size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Eksik Alanlar Mevcut</span>
+            </div>
           )}
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {step > 1 && (
-              <button type="button" onClick={prevStep} className="flex-1 py-3.5 px-6 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center gap-2 transition-transform active:scale-95">
+              <button 
+                type="button" 
+                onClick={prevStep} 
+                className="flex-1 py-5 px-6 rounded-[1.5rem] bg-slate-100 text-slate-600 font-black flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest"
+              >
                 <ChevronLeft size={18} /> Geri
               </button>
             )}
@@ -705,24 +642,30 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSave, onCancel }) => {
                 type="button"
                 onClick={nextStep} 
                 disabled={!isStep1Valid} 
-                className={`flex-1 py-3.5 px-6 rounded-xl font-bold flex items-center justify-center gap-2 text-white shadow-md transition-all active:scale-95 ${!isStep1Valid ? 'bg-slate-300 shadow-none cursor-not-allowed opacity-50' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-100'}`}
+                className={`flex-1 py-5 px-6 rounded-[1.5rem] font-black flex items-center justify-center gap-2 text-white shadow-xl transition-all active:scale-95 text-xs uppercase tracking-widest ${!isStep1Valid ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-black shadow-slate-200'}`}
               >
-                İleri <ChevronRight size={18} />
+                İLERİ <ChevronRight size={18} />
               </button>
             ) : (
               <button 
                 type="button"
                 onClick={handleSubmit} 
                 disabled={!isStep2Valid}
-                className={`flex-1 py-3.5 px-6 rounded-xl font-bold flex items-center justify-center gap-2 text-white shadow-lg transition-all active:scale-95 ${!isStep2Valid ? 'bg-slate-300 shadow-none cursor-not-allowed opacity-50' : 'bg-slate-900 hover:bg-black shadow-slate-200'}`}
+                className={`flex-1 py-5 px-6 rounded-[1.5rem] font-black flex items-center justify-center gap-2 text-white shadow-2xl transition-all active:scale-95 text-xs uppercase tracking-widest ${!isStep2Valid ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'}`}
               >
-                <Save size={18} /> Raporu Bitir
+                <Save size={18} /> RAPORU TAMAMLA
               </button>
             )}
           </div>
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="w-full py-4 text-slate-300 font-black text-[10px] uppercase tracking-[0.3em] hover:text-rose-500 transition-colors"
+          >
+            ZİYARETİ İPTAL ET
+          </button>
         </div>
       </div>
-      <button type="button" onClick={onCancel} className="w-full mt-6 text-slate-400 font-bold text-xs uppercase tracking-widest py-2">İşlemi İptal Et</button>
     </div>
   );
 };
